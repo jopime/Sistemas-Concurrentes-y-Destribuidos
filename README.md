@@ -1,2 +1,2 @@
 # Sistemas-Concurrentes-y-Destribuidos
-Practicas de la asignatura "Sistemas concurrentes y distribuidos" del doble grado de informatica y matematicas 
+Prácticas de la asignatura "Sistemas Concurrentes y Distribuidos" del Doble Grado de Informática y Matemáticas de la Universidad de Granada
