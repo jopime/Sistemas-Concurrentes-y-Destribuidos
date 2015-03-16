@@ -28,12 +28,12 @@ void * productor(void *){
 
     int dato=producir_dato();
     sem_wait(&puede_escribir);
-      buffer[primera_libre]=dato;
-      primera_libre++;
-      sem_wait(&mutex);
-      	  cout<<"Ultima posicion libre tras escritura: "<<primera_libre<<" "<<endl;
+    sem_wait(&mutex);
+	buffer[primera_libre]=dato;
+	primera_libre++;
+	    cout<<"Ultima posicion libre tras escritura: "<<primera_libre<<" "<<endl;
       sem_post(&mutex);
-      sem_post(&puede_leer);
+    sem_post(&puede_leer);
     }
     return NULL;
 }
@@ -41,10 +41,10 @@ void * productor(void *){
 void * consumidor(void *){
   for (unsigned i=0; i<num_items; i++){
     sem_wait(&puede_leer);
-    
+    sem_wait(&mutex);
+
       primera_libre--;
       int dato=buffer[primera_libre];
-            sem_wait(&mutex);
 	  cout<<"Ultima posicion libre tras lectura: "<<primera_libre<<" ";
           consumir_dato(dato);
 	        sem_post(&mutex);

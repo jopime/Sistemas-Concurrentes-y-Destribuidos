@@ -1,5 +1,5 @@
 /*
-*EN ESTA VERSION USO 2 SEMAFOROS SIMPLES
+*EN ESTA VERSION USO 3 semaforos pero con mayor concurrencia.
 * 
 * 
 */
