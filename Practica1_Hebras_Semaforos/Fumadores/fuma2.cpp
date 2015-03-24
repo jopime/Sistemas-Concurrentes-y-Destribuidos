@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <iostream>
 using namespace std;
-
+z
 sem_t s_tabaco,s_papel,s_cerillas,s_estanquero;
 
 
