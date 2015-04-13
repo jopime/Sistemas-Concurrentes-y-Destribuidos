@@ -1,6 +1,6 @@
 /********************************************************************************************************
  * 
- * Version Productor Consumidor concurrente con varias hebras accediendo a un FIFO
+ * Version Productor Consumidor concurrente con varias hebras accediendo a un LIFO
  * 
  * g++ ./pclifog.cpp -o pclifog -lpthread 
  * ./pclifog numpro numcons
@@ -20,6 +20,7 @@ const unsigned tam_vec = 7;
 unsigned buffer[tam_vec];
 unsigned primera_libre=0;
 bool fin=false;
+int consumiciones=0;
 
 int producir_dato(){
   static int contador=1;
@@ -63,10 +64,11 @@ void * consumidor(void * num_h){
 	 }      
       primera_libre--;
       int dato=buffer[primera_libre];
+      consumiciones ++;
       sem_wait(&mutex);
 	cout<<"Ultima posicion libre tras lectura: "<<primera_libre<<" ";
 	consumir_dato(dato);
-      if(dato==num_items) {fin=true; sem_post(&puede_leer);}
+	if(consumiciones==num_items) {fin=true; sem_post(&puede_leer);}
       sem_post(&mutex);
     sem_post(&puede_escribir);
   }

@@ -13,6 +13,7 @@
 #include <semaphore.h>
 #include <pthread.h>
 #include <iostream>
+
 using namespace std;
 sem_t s_tabaco,s_papel,s_cerillas,s_estanquero,s_fin;
 int contador=15;
@@ -43,13 +44,13 @@ void fumar(){
       }
       else if (saco==1){
 	cout<<"Saco papel"<<endl<<flush;
+	
 	sem_post(& s_papel);		
       }
       else{
 	cout<<"Saco cerilla"<<endl<<flush;
 	sem_post(& s_cerillas);		
       }
-	  
     }
     
   }
@@ -58,7 +59,7 @@ void fumar(){
       while (true){     
 
 	sem_wait(&s_tabaco);
-	  cout <<"Soy tipo 0 hebra "<<((unsigned long) arg_ptr)<<" Ingrediente consumido: tabaco"<<endl;
+	  cout <<"Soy tipo 0 hebra "<<((unsigned long) arg_ptr)<<" Ingrediente que consume: tabaco"<<endl;
 	  sem_post(&s_estanquero);
 	  sem_wait(&s_fin);
 	    if (contador<=0){  
@@ -75,7 +76,7 @@ void fumar(){
   void * fumador1(void * arg_ptr){
       while (true){    
 	sem_wait(&s_papel);
-	  cout <<"Soy tipo 1 hebra "<<((unsigned long) arg_ptr)<<" Ingrediente consumido: papel"<<endl;
+	  cout <<"Soy tipo 1 hebra "<<((unsigned long) arg_ptr)<<" Ingrediente que consume: papel"<<endl;
 	sem_post(&s_estanquero);
 	sem_wait(&s_fin);
 	  if (contador<=0){  
@@ -91,7 +92,7 @@ void fumar(){
   void * fumador2(void * arg_ptr){
 	while (true){     
 	  sem_wait(&s_cerillas);
-	    cout <<" Soy tipo 2 hebra: "<<((unsigned long) arg_ptr)<<" Ingrediente consumido: cerillas"<<endl;
+	    cout <<" Soy tipo 2 hebra: "<<((unsigned long) arg_ptr)<<" Ingrediente que consume: cerillas"<<endl;
 	  sem_post(&s_estanquero);
 	  sem_wait(&s_fin);
 	    if (contador<=0){  
@@ -116,7 +117,7 @@ int main(int argc, char *argv[]){
       exit(1);
      }
     srand(time(NULL));
-    int a=atoi(argv[1]),b=atoi(argv[1]),c=atoi(argv[1]);
+    int a=atoi(argv[1]),b=atoi(argv[2]),c=atoi(argv[3]);
     int t=0;
     pthread_t f[a+b+c],e ;
 
@@ -126,28 +127,33 @@ int main(int argc, char *argv[]){
     sem_init(&s_cerillas,0,0);
     sem_init(&s_estanquero,0,1);
     sem_init(&s_fin,0,1);
-    
+
     cout <<"Vamos a crear hebras fumadoras tipo 0,1,2 segun le falten tabaco,papel o cerillas."<<endl;
+    
       for(unsigned j=0;j<atoi(argv[1]);j++){
 	void * arg_ptr=(void *)t;
 	pthread_create(&(f[t]),NULL,fumador0,arg_ptr);
 	cout <<"hebra "<<t<<" tipo 0 creada"<<endl;
 		t++;
       }
-          for(unsigned j=0;j<atoi(argv[1]);j++){
+          for(unsigned j=0;j<atoi(argv[2]);j++){
 	void * arg_ptr=(void *)t;
 	pthread_create(&(f[t]),NULL,fumador1,arg_ptr);
 	cout <<"hebra "<<t<<" tipo 1 creada"<<endl;
 		t++;
       }
-            for(unsigned j=0;j<atoi(argv[1]);j++){
+            for(unsigned j=0;j<atoi(argv[3]);j++){
 	void * arg_ptr=(void *)t;
 	pthread_create(&(f[t]),NULL,fumador2,arg_ptr);
 	cout <<"hebra "<<t<<" tipo 2 creada"<<endl;
 		t++;
       }
+      
+    cout<<"Intro para empezar a fuamr...\n"<<endl;
+    if(cin.get()=='\n'){
         pthread_create(&e,NULL,estanquero,NULL);			//CONVENIENTE CREAR EL ESTANQUERO DESPUES DE LOS FUMADORES
 									//PARA QUE NO SE EMPIEZE A FUMAR HASTA CREAR A TODOS
+
 
     for(unsigned i=0;i<t;i++){
       void * arg_ptr=(void *)i;
@@ -155,10 +161,16 @@ int main(int argc, char *argv[]){
     }
     pthread_join(e,NULL);
     cout << "hebras terminadas." << endl<<"FIN" <<endl;
-   
+     }
+  else {
+    cout << "Salimos forzosamente...";
+    
+  }
     sem_destroy(&s_estanquero);
     sem_destroy(&s_cerillas);  
     sem_destroy(&s_papel);
     sem_destroy(&s_tabaco);
     sem_destroy(&s_fin);
-  }
+
+  
+}
