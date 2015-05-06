@@ -22,7 +22,7 @@ class Estanco extends AbstractMonitor{
 
 	private int ingredienteActual=-1;
 // invocado por cada fumador, indicando su ingrediente o numero
-	public void obtenerIngrediente( int miIngrediente ){
+	public void obtenerIngrediente( int miIngrediente, Thread thr){
 		enter();
 		if (ingredienteActual!=miIngrediente){
 			switch(miIngrediente) {
@@ -31,14 +31,16 @@ class Estanco extends AbstractMonitor{
 				case 2: colaF2.await();	break;	
 			}		
 		}
+			System.out.println(thr.getName()+", Comienza a fumar " + miIngrediente+miIngrediente);
 			ingredienteActual=-1;
 			colaE.signal();
 		leave();
 	}
 // invocado por el estanquero, indicando el ingrediente que pone
-	public void ponerIngrediente( int ingrediente ){
+	public void ponerIngrediente( int ingrediente , Thread thr){
 		enter();
 			ingredienteActual=ingrediente;
+			System.out.println(thr.getName()+", SACO " + ingrediente);
 			switch(ingredienteActual) {
 				case 0: colaF0.signal(); break;
 				case 1: colaF1.signal(); break;
@@ -48,9 +50,12 @@ class Estanco extends AbstractMonitor{
 		leave();
 	}
 // invocado por el estanquero
-	public void esperarRecogidaIngrediente(){
+	public void esperarRecogidaIngrediente(Thread thr){
 		enter();
-			if(ingredienteActual!=-1) colaE.await();
+			if(ingredienteActual!=-1) {
+				System.out.println(thr.getName()+", SIN INGREDIENTES ");
+				colaE.await();
+			}
 		leave();
 	}
 }
@@ -69,8 +74,7 @@ class Fumador implements Runnable{
 	}
 	public void run(){
 		while ( true ){
-			miestanco.obtenerIngrediente( miIngrediente );
-			System.out.println(thr.getName()+", EMPIEZA a fumar " + miIngrediente);
+			miestanco.obtenerIngrediente( miIngrediente ,thr);
 			aux.dormir_max( 2000 );
 			System.out.println(thr.getName()+", TERMINA de fumar " + miIngrediente);
 		}
@@ -91,13 +95,11 @@ class Estanquero implements Runnable{
 		int ingrediente ;
 		while (true){
 			ingrediente = (int) (Math.random () * 3.0); // 0,1 o 2
-			miestanco.ponerIngrediente( ingrediente );
-			System.out.println(thr.getName()+", SACO " + ingrediente);
-			miestanco.esperarRecogidaIngrediente() ;
-			System.out.println(thr.getName()+", SIN INGREDIENTES ");
-			}
+			miestanco.ponerIngrediente( ingrediente,thr );
+			miestanco.esperarRecogidaIngrediente(thr) ;
 		}
 	}
+}
 
 
 //**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**//**
@@ -112,13 +114,15 @@ class EjemploFumador{
     		Estanquero  estanquero = new Estanquero(estanco) ;
 
 	  // crear hebras
-	  for(int i = 0; i < 3; i++) 
-	    fumadores[i] = new Fumador(estanco,i) ;
+
+		for (int i=0;i<3;i++)
+		    fumadores[i] = new Fumador(estanco,i);
 
 	  // poner en marcha las hebras
-	  estanquero.thr.start();
-	  for(int i = 0; i < 3; i++) fumadores[i].thr.start();
-  }
+		estanquero.thr.start();
+		for (int i=0;i<3;i++)
+			fumadores[i].thr.start();
+	}
 }
 
 
